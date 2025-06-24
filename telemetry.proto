@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package telemetry;
+
+
+enum System {
+    UNKNOWN_SYSTEM = 0;
+    ENGINE = 1;
+    FUEL_TANK = 2;
+    AVIONICS = 3;
+    TURBOPUMP = 4;
+    GUIDANCE = 5;
+    STAGE1 = 6;
+    STAGE2 = 7;
+}
+
+
+message TelemetryTemp {
+    string timestamp = 1;
+    string sensor_id = 2;
+    
+    System subsystem = 3;
+    
+    float temperature = 4;
+    string unit = 5;
+    
+    uint32 status_bitmask = 6;
+    uint32 sensor_health = 7;
+
+    int32 sequence_number = 8;
+};

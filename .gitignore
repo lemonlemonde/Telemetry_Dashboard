@@ -1,0 +1,49 @@
+.DS_STORE
+
+*.exe
+*.out
+*.app
+
+*.o
+*.obj
+
+*.lib
+*.a
+*.la
+*.lo
+*.so
+*.dylib
+
+# CMake files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+*.cmake
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Database files (if you add local DB for testing)
+*.db
+*.sqlite
+*.sqlite3
+
+# Temporary files
+*.tmp
+*.temp
+
+# gRPC installation
+.local
+build

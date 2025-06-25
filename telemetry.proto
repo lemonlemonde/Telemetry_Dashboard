@@ -14,18 +14,75 @@ enum System {
     STAGE2 = 7;
 }
 
+enum TelemetryType {
+    TEMPERATURE = 0;
+    VELOCITY = 1;
+    PRESSURE = 2;
+}
 
-message TelemetryTemp {
+service TelemetryService {
+    // specific method 
+    rpc GetTelemetryStream(TelemetryRequest) returns (stream TelemetryResponse);
+}
+
+// request all telemetry for all TelemetryType's
+message TelemetryRequest {
+}
+
+
+message TelemetryResponse {
     string timestamp = 1;
-    string sensor_id = 2;
     
-    System subsystem = 3;
+    TelemetryType type = 4;
     
-    float temperature = 4;
-    string unit = 5;
-    
-    uint32 status_bitmask = 6;
-    uint32 sensor_health = 7;
+    // Use oneof for type-specific data
+    oneof data {
+        TemperatureData temperature = 5;
+        // TODO: add velocity, pressure
+        // VelocityData velocity = 6;
+        // PressureData pressure = 7;
+    }
+}
 
-    int32 sequence_number = 8;
-};
+
+message TemperatureData {
+    string sensor_id = 1;
+    System subsystem = 2;
+    float temperature = 3;
+    string unit = 4;
+    
+    uint32 status_bitmask = 5;
+
+    int32 sequence_number = 6;
+}
+
+// TODO: add velocity + pressure
+// struct Pressure_Schema {
+//     // ISO 8601 UTC
+//     std::string timestamp;
+//     std::string sensor_id;
+    
+//     System subsystem;
+    
+//     float pressure;
+//     std::string unit;
+    
+//     bool leak_detected;
+// };
+
+// struct Velocity_Schema {
+//     // ISO 8601 UTC
+//     std::string timestamp;
+//     std::string sensor_id;
+
+//     System subsystem;
+//     float velocity_x;
+//     float velocity_y;
+//     float velocity_z;
+
+//     std::string unit;
+
+//     float vibration_mag;
+
+    
+// };

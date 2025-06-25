@@ -51,11 +51,21 @@ public:
         while (reader->Read(&resp) && running.load()) {
             std::cout << "[" << resp.timestamp() << "]";
             switch (resp.type()) {
-                case telemetry::TelemetryType::TEMPERATURE:
+                case telemetry::TelemetryType::TEMPERATURE: {
                     telemetry::TemperatureData temperature_data = resp.temperature();
-
                     std::cout << " TEMPERATURE - " << temperature_data.sensor_id() << " - " << temperature_data.temperature() << std::endl;
-                // TODO: Add velocity, pressure cases
+                    break;
+                }
+                case telemetry::TelemetryType::PRESSURE: {
+                    telemetry::PressureData pressure_data = resp.pressure();
+                    std::cout << " PRESSURE - " << pressure_data.sensor_id() << " - " << pressure_data.pressure() << std::endl;
+                    break;
+                }
+                case telemetry::TelemetryType::VELOCITY: {
+                    telemetry::VelocityData velocity_data = resp.velocity();
+                    std::cout << " VELOCITY - " << velocity_data.sensor_id() << " - (" << velocity_data.velocity_x() << ", " << velocity_data.velocity_y() << ", " << velocity_data.velocity_z() << ")" << std::endl;
+                    break;
+                }
             }
         }
 

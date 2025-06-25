@@ -16,8 +16,8 @@ enum System {
 
 enum TelemetryType {
     TEMPERATURE = 0;
-    VELOCITY = 1;
-    PRESSURE = 2;
+    PRESSURE = 1;
+    VELOCITY = 2;
 }
 
 service TelemetryService {
@@ -38,9 +38,8 @@ message TelemetryResponse {
     // Use oneof for type-specific data
     oneof data {
         TemperatureData temperature = 5;
-        // TODO: add velocity, pressure
-        // VelocityData velocity = 6;
-        // PressureData pressure = 7;
+        PressureData pressure = 6;
+        VelocityData velocity = 7;
     }
 }
 
@@ -48,41 +47,36 @@ message TelemetryResponse {
 message TemperatureData {
     string sensor_id = 1;
     System subsystem = 2;
+
     float temperature = 3;
     string unit = 4;
-    
     uint32 status_bitmask = 5;
-
+    
     int32 sequence_number = 6;
 }
 
-// TODO: add velocity + pressure
-// struct Pressure_Schema {
-//     // ISO 8601 UTC
-//     std::string timestamp;
-//     std::string sensor_id;
+message PressureData {
+    string sensor_id = 1;
+    System subsystem = 2;
     
-//     System subsystem;
+    float pressure = 3;
+    string unit = 4;
+    uint32 status_bitmask = 5;
+    bool leak_detected = 6;
     
-//     float pressure;
-//     std::string unit;
+    int32 sequence_number = 7;
+}
+
+message VelocityData {
+    string sensor_id = 1;
+    System subsystem = 2;
     
-//     bool leak_detected;
-// };
-
-// struct Velocity_Schema {
-//     // ISO 8601 UTC
-//     std::string timestamp;
-//     std::string sensor_id;
-
-//     System subsystem;
-//     float velocity_x;
-//     float velocity_y;
-//     float velocity_z;
-
-//     std::string unit;
-
-//     float vibration_mag;
-
+    float velocity_x = 3;
+    float velocity_y = 4;
+    float velocity_z = 5;
+    string unit = 6;
+    float vibration_mag = 7;
     
-// };
+    uint32 status_bitmask = 8;
+    int32 sequence_number = 9;
+}

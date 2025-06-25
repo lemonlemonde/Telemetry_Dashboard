@@ -76,9 +76,40 @@ class TelemetryQueue {
 TelemetryQueue telem_q;
 
 // Sensor List
-std::vector<std::tuple<std::string, telemetry::System, std::string>> sensor_names = {
-    // (std::string sensor_id, telemetry::System subsystem, std::string unit)
-    std::make_tuple("TEMP_ENG_001", telemetry::System::ENGINE, "celsius"),
+std::vector<std::tuple<std::string, telemetry::TelemetryType, telemetry::System, std::string, std::uint64_t>> sensor_names = {
+    // sensor_id, TelemetryType, System, unit, interval_ms
+    std::make_tuple(
+        "TEMP_ENG_001", 
+        telemetry::TelemetryType::TEMPERATURE, 
+        telemetry::System::ENGINE, 
+        "celsius",
+        900
+    ),
+    std::make_tuple(
+        "TEMP_FUEL_001",
+        telemetry::TelemetryType::TEMPERATURE,
+        telemetry::System::FUEL_TANK,
+        "celsius",
+        500
+    ),
+    std::make_tuple("PRESS_ENG_001",
+        telemetry::TelemetryType::PRESSURE,
+        telemetry::System::ENGINE,
+        "bar",
+        1200
+    ),
+    std::make_tuple("PRESS_FUEL_002",
+        telemetry::TelemetryType::PRESSURE,
+        telemetry::System::FUEL_TANK,
+        "bar",
+        1000
+    ),
+    std::make_tuple("VELO_STAGE1_001",
+        telemetry::TelemetryType::VELOCITY,
+        telemetry::System::STAGE1,
+        "m/s",
+        400
+    ),
 };
 // Sensor threads for cleanup (join())
 std::vector<std::thread> sensor_threads = {};
@@ -107,6 +138,14 @@ void temp_sensor_worker(int interval_ms, std::string sensor_id, telemetry::Syste
     // starting vals
     float cur_temp = 30.0f;
     uint32_t seq_num = 0;
+
+    // Range: [-30°C to 85°C]
+	// - fluctuations of about -10~10deg per interval_ms
+	// - status bitmask
+		// - `[-10, 65]` = OK
+		// - `[-20, -10)` or `(65, 75]` = WARNING
+		// - `[-30, 20)` or `(75, 85]` = CRITICAL
+		// - `(-inf, -30)` or `(85, inf)` = OFFLINE
 
     while (running.load()) {
         std::this_thread::sleep_for(std::chrono::milliseconds(interval_ms));
@@ -149,6 +188,132 @@ void temp_sensor_worker(int interval_ms, std::string sensor_id, telemetry::Syste
         telem_q.push(resp);
         
         std::cout << "Temperature data queued: [" << resp.timestamp() << "] TEMPERATURE - " << sensor_id << " - " << cur_temp << "˚C!\n";
+    }
+}
+void press_sensor_worker(int interval_ms, std::string sensor_id, telemetry::System subsystem, std::string unit) {
+
+    // starting vals for "bar" units
+    float cur_press = 200.0f;
+    uint32_t seq_num = 0;
+
+    // Range: [100, 300]
+        // fluctuations of -5~5 per interval_ms
+        // status_bitmask:
+            // OK = [180, 220]
+            // WARNING = [140, 180) or (220, 260]
+            // CRITICAL = [100, 140) or (260, 300]
+            // OFFLINE = (-inf, 100) or (300, inf)
+
+    // TODO: use leak_detected... 
+        // if consistently falling?
+
+    while (running.load()) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(interval_ms));
+
+        // telem response container
+        telemetry::TelemetryResponse resp;
+        resp.set_timestamp(get_iso8601_timestamp());
+        resp.set_type(telemetry::TelemetryType::PRESSURE);
+
+        // the "inner" message "class"
+        auto* pressure_data = resp.mutable_pressure();
+        
+        pressure_data->set_sensor_id(sensor_id);
+        pressure_data->set_subsystem(subsystem);
+        pressure_data->set_unit(unit);
+        
+        // get new pressure
+        cur_press += get_randf_in_range(-5.0f, 5.0f);
+        pressure_data->set_pressure(cur_press);
+        uint32_t status_bitmask = 0;
+        if (180.0f <= cur_press && cur_press <= 220.0f) {
+            // ok
+            status_bitmask = 0;
+        } else if (140.0f <= cur_press && cur_press <= 260.0f) {
+            // warning
+            status_bitmask = 1;
+        } else if (100.0f <= cur_press && cur_press <= 300.0f) {
+            // critical
+            status_bitmask = 2;
+        } else {
+            // offline
+            status_bitmask = 4;
+        }
+
+        pressure_data->set_status_bitmask(status_bitmask);
+        seq_num += 1;
+        pressure_data->set_sequence_number(seq_num);
+        
+        // send it off to TelemetryQueue, and it'll be sent via gRPC
+        telem_q.push(resp);
+        
+        std::cout << "Pressure data queued: [" << resp.timestamp() << "] PRESSURE - " << sensor_id << " - " << cur_press << " " << unit << "!\n";
+    }
+}
+void velo_sensor_worker(int interval_ms, std::string sensor_id, telemetry::System subsystem, std::string unit) {
+    // starting vals
+    float cur_velo_x = 8000.0f;
+    float cur_velo_y = 8000.0f;
+    float cur_velo_z = 8000.0f;
+    uint32_t seq_num = 0;
+
+    // TODO: use vibration_magnitude?
+
+    // Range: [-15000, 15000]
+        // fluctuations of -40~40 per interval_ms
+        // status_bitmask:
+            // OK (0-12,000): Normal cruise/operational velocity
+            // WARNING (12,000-14,000): High velocity, monitor closely
+            // CRITICAL (14,000-15,000): At design limits, immediate attention needed
+            // OFFLINE (>15,000): Beyond safe limits, system fault
+
+    while (running.load()) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(interval_ms));
+        
+        // telem response container
+        telemetry::TelemetryResponse resp;
+        resp.set_timestamp(get_iso8601_timestamp());
+        resp.set_type(telemetry::TelemetryType::VELOCITY);
+        
+        // the "inner" message "class"
+        auto* velocity_data = resp.mutable_velocity();
+        
+        velocity_data->set_sensor_id(sensor_id);
+        velocity_data->set_subsystem(subsystem);
+        velocity_data->set_unit(unit);
+        
+        // get new velocity mag
+        cur_velo_x += get_randf_in_range(-5.0f, 5.0f);
+        cur_velo_y += get_randf_in_range(-5.0f, 5.0f);
+        cur_velo_z += get_randf_in_range(-5.0f, 5.0f);
+        velocity_data->set_velocity_x(cur_velo_x);
+        velocity_data->set_velocity_y(cur_velo_y);
+        velocity_data->set_velocity_z(cur_velo_z);
+
+        float velocity_magnitude = sqrt(cur_velo_x*cur_velo_x + cur_velo_y*cur_velo_y + cur_velo_z*cur_velo_z);
+        uint32_t status_bitmask = 0;
+        if (velocity_magnitude <= 12000.0f) {
+            // ok
+            status_bitmask = 0;
+        } else if (velocity_magnitude <= 14000.0f) {
+            // warning
+            status_bitmask = 1;
+        } else if (velocity_magnitude <= 15000.0f) {
+            // critical
+            status_bitmask = 2;
+        } else {
+            // offline
+            status_bitmask = 4;
+        }
+
+        velocity_data->set_status_bitmask(status_bitmask);
+        seq_num += 1;
+        velocity_data->set_sequence_number(seq_num);
+        
+        // send it off to TelemetryQueue, and it'll be sent via gRPC
+        telem_q.push(resp);
+        
+        std::cout << "Velocity data queued: [" << resp.timestamp() << "] VELOCITY - " << sensor_id << " - (" << cur_velo_x << ", " << cur_velo_y << ", " << cur_velo_z << ") " << unit << "!\n";
     }
 }
 
@@ -216,13 +381,22 @@ int main() {
 
     // start threads of diff sensors
     for (int i = 0; i < sensor_names.size(); i++) {
-        // (std::string sensor_id, telemetry::System subsystem, std::string unit)
+        // std::string sensor_id, telemetry::TelemetryType, telemetry::System subsystem, std::string unit, std::uint64_t interval_ms
         std::string sensor_id = std::get<0>(sensor_names[i]);
-        telemetry::System subsystem = std::get<1>(sensor_names[i]);
-        std::string unit = std::get<2>(sensor_names[i]);
+        telemetry::TelemetryType telem_type = std::get<1>(sensor_names[i]);
+        telemetry::System subsystem = std::get<2>(sensor_names[i]);
+        std::string unit = std::get<3>(sensor_names[i]);
+        std::uint64_t interval_ms = std::get<4>(sensor_names[i]);
 
         // TODO: change function for velocity, pressure
-        sensor_threads.emplace_back(temp_sensor_worker, 600, sensor_id, subsystem, unit);
+        if (telem_type == telemetry::TelemetryType::TEMPERATURE) {
+            sensor_threads.emplace_back(temp_sensor_worker, interval_ms, sensor_id, subsystem, unit);
+        } else if (telem_type == telemetry::TelemetryType::PRESSURE) {
+            sensor_threads.emplace_back(press_sensor_worker, interval_ms, sensor_id, subsystem, unit);
+        } else if (telem_type == telemetry::TelemetryType::VELOCITY) { 
+            sensor_threads.emplace_back(velo_sensor_worker, interval_ms, sensor_id, subsystem, unit);
+        }
+
     }
 
     std::cout << "Started " << sensor_threads.size() << " sensor threads!!!\n";

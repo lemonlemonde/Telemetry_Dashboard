@@ -34,3 +34,8 @@ cd build
 
 ## Versioning
 - I had some issues with a globally installed `protobuf` version via homebrew. It conflicted with my locally installed `protobuf` version. It was a dependency of my `osrf/simulation/gz-harmonic` installation :/. I ended up uninstalling via brew, and only using the locally installed `.local` version.
+
+
+## Future improvements
+- [ ] Make enums for units
+- [ ] Separate enums for subsystems?

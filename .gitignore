@@ -47,3 +47,7 @@ Thumbs.db
 # gRPC installation
 .local
 build
+
+# venv
+.venv
+__pycache__

@@ -62,16 +62,16 @@ target_include_directories(telemetry_server PRIVATE
 )
 
 # Client executable
-add_executable(telemetry_client 
-    client.cpp
-    ${PROTO_SRCS}
-)
+# add_executable(telemetry_client 
+#     client.cpp
+#     ${PROTO_SRCS}
+# )
 
-target_link_libraries(telemetry_client
-    gRPC::grpc++
-    protobuf::libprotobuf
-)
+# target_link_libraries(telemetry_client
+#     gRPC::grpc++
+#     protobuf::libprotobuf
+# )
 
-target_include_directories(telemetry_client PRIVATE 
-    ${CMAKE_CURRENT_BINARY_DIR}
-)
+# target_include_directories(telemetry_client PRIVATE 
+#     ${CMAKE_CURRENT_BINARY_DIR}
+# )

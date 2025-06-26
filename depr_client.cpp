@@ -1,3 +1,24 @@
+
+
+
+
+
+
+
+
+// DEPRECATED
+// I'm going to use a Python client instead!
+
+
+
+
+
+
+
+
+
+
+
 #include <iostream>
 #include <thread>
 #include <atomic>

@@ -7,7 +7,12 @@
 - homebrew:
 
 ```shell
-brew install cmake boost
+brew install cmake boost postgresql
+
+python3 -m venv .venv
+source .venv/bin/activate
+
+python -m pip install wheel grcpio grpcio-tools
 ```
 
 ## Quick start
@@ -18,13 +23,35 @@ cmake ..
 make
 ```
 
+**postgresql:**
+```shell
+brew services start postgresql
+
+# connect with cur user
+psql postgres
+# make db
+postgres-# CREATE DATABASE IF NOT EXISTS telemetry;
+
+# make everything else
+psql -U mirujun -d telemetry -f telem.sql
+```
+
 **server:**
 ```shell
 cd build
 ./telemetry_server
 ```
 
-**client:**
+**client (python):**
+```shell
+source .venv/bin/activate
+# in root dir
+python -m grpc_tools.protoc --proto_path=. --python_out=. --grpc_python_out=. telemetry.proto
+python client.py
+```
+
+**for deprecated cpp client:**
+- need to uncomment the client.cpp executable in `CMakeLists.txt`
 ```shell
 cd build
 ./telemetry_client

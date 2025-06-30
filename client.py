@@ -4,7 +4,11 @@ from google.protobuf.json_format import MessageToDict
 import telemetry_pb2
 import telemetry_pb2_grpc
 import psycopg2
+
+import requests
 import typing
+import json
+from pprint import pprint
 
 
 
@@ -73,38 +77,35 @@ def process_data(telem_response) -> dict:
     def process_unknown_data():
         raise NotImplementedError(f"Data processing not implemented for telemetry type: {telem_response.type}")
 
-
-    telem_dict = MessageToDict(telem_response)
-    if telem_response.type == '0':
-        telem_type = 'TEMPERATURE'
-    elif telem_response.type == '0':
-        telem_type = 'PRESSURE'
-    else:
-        telem_type = 'VELOCITY'
+    pprint(f"RAW RESPONSE: {telem_response}")
+    telem_dict = MessageToDict(telem_response, always_print_fields_with_no_presence=True)
+    
+    pprint(f"GOT dictionary: {telem_dict}")
     # remap keys/headers from .proto to sql table
     db_data = {
         'reading_timestamp': telem_dict.get('timestamp'),
-        'telemetry_type': telem_type,
+        'telemetry_type': None,
         'sensor_id': None,
         'subsystem': None,
         'sequence_number': None,
         'status_bitmask': None,
-        # temp only
-        'temperature': None,
-        'temp_unit': None,
-        # pressure only
-        'pressure': None,
-        'pressure_unit': None,
-        'leak_detected': None,
-        # velo only
-        'velocity_x': None,
-        'velocity_y': None,
-        'velocity_z': None,
-        'velocity_unit': None,
-        'vibration_magnitude': None
+        # # temp only
+        # 'temperature': None,
+        # 'temp_unit': None,
+        # # pressure only
+        # 'pressure': None,
+        # 'pressure_unit': None,
+        # 'leak_detected': None,
+        # # velo only
+        # 'velocity_x': None,
+        # 'velocity_y': None,
+        # 'velocity_z': None,
+        # 'velocity_unit': None,
+        # 'vibration_magnitude': None
     }
     
     if 'temperature' in telem_dict:
+        db_data['telemetry_type'] = 'TEMPERATURE'
         temp_data = telem_dict['temperature']
         db_data.update({
             'sensor_id': temp_data.get('sensorId'),
@@ -116,6 +117,7 @@ def process_data(telem_response) -> dict:
         })
         
     elif 'pressure' in telem_dict:
+        db_data['telemetry_type'] = 'PRESSURE'
         pressure_data = telem_dict['pressure']
         db_data.update({
             'sensor_id': pressure_data.get('sensorId'),
@@ -128,6 +130,7 @@ def process_data(telem_response) -> dict:
         })
         
     elif 'velocity' in telem_dict:
+        db_data['telemetry_type'] = 'VELOCITY'
         velocity_data = telem_dict['velocity']
         db_data.update({
             'sensor_id': velocity_data.get('sensorId'),
@@ -197,6 +200,10 @@ if __name__ == "__main__":
             push_to_db(telem_dict, conn, cur)
             
             # TODO: /POST to dashboard backend
+            json_str = json.dumps(telem_dict)
+            print(json_str)
+            dashboard_response = requests.post(url='http://127.0.0.1:8000/telem_data', json=telem_dict)
+            pprint(dashboard_response.json())
             
     except grpc.RpcError as e:
         print(f"Oh no! gRPC error: {e}")

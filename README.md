@@ -4,7 +4,7 @@
 - Follow gRPC C++ installation instructions, install into relative dir `.local`
     - most recent (as of June 24, 2025) protobuf version is == 6031000 == 31.0 (https://github.com/grpc/grpc/releases/tag/v1.73.0).
     - may run into version issues if multiple versions of `protobuf` installed
-- homebrew:
+- more things:
 
 ```shell
 brew install cmake boost postgresql
@@ -12,7 +12,10 @@ brew install cmake boost postgresql
 python3 -m venv .venv
 source .venv/bin/activate
 
-python -m pip install wheel grcpio grpcio-tools "fastapi[standard]"
+pip install wheel grcpio grpcio-tools
+pip install "fastapi[standard]" uvicorn
+
+npm install
 ```
 
 ## Quick start
@@ -57,10 +60,18 @@ cd build
 ./telemetry_client
 ```
 
+**dashboard backend:**
+```shell
+source .venv/bin/activate
+# in root dir 
+uvicorn backend:app --reload
+```
+
 
 
 ## Versioning
 - I had some issues with a globally installed `protobuf` version via homebrew. It conflicted with my locally installed `protobuf` version. It was a dependency of my `osrf/simulation/gz-harmonic` installation :/. I ended up uninstalling via brew, and only using the locally installed `.local` version.
+
 
 
 ## Future improvements
@@ -69,3 +80,7 @@ cd build
 - [ ] Better organize python gRPC files...
 - [ ] Make enums for units
 - [ ] Separate enums for subsystems?
+
+
+## other notes
+- `boost` is just for getting iso8601 time

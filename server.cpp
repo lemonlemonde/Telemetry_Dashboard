@@ -187,7 +187,7 @@ void temp_sensor_worker(int interval_ms, std::string sensor_id, telemetry::Syste
         // send it off to TelemetryQueue, and it'll be sent via gRPC
         telem_q.push(resp);
         
-        std::cout << "Temperature data queued: [" << resp.timestamp() << "] TEMPERATURE - " << sensor_id << " - " << cur_temp << "˚C!\n";
+        std::cout << "Temperature data queued: [" << resp.timestamp() << "] TEMPERATURE - " << sensor_id << " - " << cur_temp << "˚C - " << resp.mutable_temperature()->status_bitmask() << "!\n";
     }
 }
 void press_sensor_worker(int interval_ms, std::string sensor_id, telemetry::System subsystem, std::string unit) {
@@ -246,8 +246,9 @@ void press_sensor_worker(int interval_ms, std::string sensor_id, telemetry::Syst
         
         // send it off to TelemetryQueue, and it'll be sent via gRPC
         telem_q.push(resp);
+
         
-        std::cout << "Pressure data queued: [" << resp.timestamp() << "] PRESSURE - " << sensor_id << " - " << cur_press << " " << unit << "!\n";
+        std::cout << "Pressure data queued: [" << resp.timestamp() << "] PRESSURE - " << sensor_id << " - " << cur_press << " " << unit << " - " << pressure_data->status_bitmask() << "!\n";
     }
 }
 void velo_sensor_worker(int interval_ms, std::string sensor_id, telemetry::System subsystem, std::string unit) {

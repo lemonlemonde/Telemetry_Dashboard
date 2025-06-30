@@ -24,27 +24,27 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0ftelemetry.proto\x12\ttelemetry\"\x12\n\x10TelemetryRequest\"\xe3\x01\n\x11TelemetryResponse\x12\x11\n\ttimestamp\x18\x01 \x01(\t\x12&\n\x04type\x18\x04 \x01(\x0e\x32\x18.telemetry.TelemetryType\x12\x31\n\x0btemperature\x18\x05 \x01(\x0b\x32\x1a.telemetry.TemperatureDataH\x00\x12+\n\x08pressure\x18\x06 \x01(\x0b\x32\x17.telemetry.PressureDataH\x00\x12+\n\x08velocity\x18\x07 \x01(\x0b\x32\x17.telemetry.VelocityDataH\x00\x42\x06\n\x04\x64\x61ta\"\x9e\x01\n\x0fTemperatureData\x12\x11\n\tsensor_id\x18\x01 \x01(\t\x12$\n\tsubsystem\x18\x02 \x01(\x0e\x32\x11.telemetry.System\x12\x13\n\x0btemperature\x18\x03 \x01(\x02\x12\x0c\n\x04unit\x18\x04 \x01(\t\x12\x16\n\x0estatus_bitmask\x18\x05 \x01(\r\x12\x17\n\x0fsequence_number\x18\x06 \x01(\x05\"\xaf\x01\n\x0cPressureData\x12\x11\n\tsensor_id\x18\x01 \x01(\t\x12$\n\tsubsystem\x18\x02 \x01(\x0e\x32\x11.telemetry.System\x12\x10\n\x08pressure\x18\x03 \x01(\x02\x12\x0c\n\x04unit\x18\x04 \x01(\t\x12\x16\n\x0estatus_bitmask\x18\x05 \x01(\r\x12\x15\n\rleak_detected\x18\x06 \x01(\x08\x12\x17\n\x0fsequence_number\x18\x07 \x01(\x05\"\xd9\x01\n\x0cVelocityData\x12\x11\n\tsensor_id\x18\x01 \x01(\t\x12$\n\tsubsystem\x18\x02 \x01(\x0e\x32\x11.telemetry.System\x12\x12\n\nvelocity_x\x18\x03 \x01(\x02\x12\x12\n\nvelocity_y\x18\x04 \x01(\x02\x12\x12\n\nvelocity_z\x18\x05 \x01(\x02\x12\x0c\n\x04unit\x18\x06 \x01(\t\x12\x15\n\rvibration_mag\x18\x07 \x01(\x02\x12\x16\n\x0estatus_bitmask\x18\x08 \x01(\r\x12\x17\n\x0fsequence_number\x18\t \x01(\x05*z\n\x06System\x12\x12\n\x0eUNKNOWN_SYSTEM\x10\x00\x12\n\n\x06\x45NGINE\x10\x01\x12\r\n\tFUEL_TANK\x10\x02\x12\x0c\n\x08\x41VIONICS\x10\x03\x12\r\n\tTURBOPUMP\x10\x04\x12\x0c\n\x08GUIDANCE\x10\x05\x12\n\n\x06STAGE1\x10\x06\x12\n\n\x06STAGE2\x10\x07*<\n\rTelemetryType\x12\x0f\n\x0bTEMPERATURE\x10\x00\x12\x0c\n\x08PRESSURE\x10\x01\x12\x0c\n\x08VELOCITY\x10\x02\x32\x65\n\x10TelemetryService\x12Q\n\x12GetTelemetryStream\x12\x1b.telemetry.TelemetryRequest\x1a\x1c.telemetry.TelemetryResponse0\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0ftelemetry.proto\x12\ttelemetry\"\x12\n\x10TelemetryRequest\"\xf1\x01\n\x11TelemetryResponse\x12\x11\n\ttimestamp\x18\x01 \x01(\t\x12+\n\x04type\x18\x04 \x01(\x0e\x32\x18.telemetry.TelemetryTypeH\x01\x88\x01\x01\x12\x31\n\x0btemperature\x18\x05 \x01(\x0b\x32\x1a.telemetry.TemperatureDataH\x00\x12+\n\x08pressure\x18\x06 \x01(\x0b\x32\x17.telemetry.PressureDataH\x00\x12+\n\x08velocity\x18\x07 \x01(\x0b\x32\x17.telemetry.VelocityDataH\x00\x42\x06\n\x04\x64\x61taB\x07\n\x05_type\"\x9e\x01\n\x0fTemperatureData\x12\x11\n\tsensor_id\x18\x01 \x01(\t\x12$\n\tsubsystem\x18\x02 \x01(\x0e\x32\x11.telemetry.System\x12\x13\n\x0btemperature\x18\x03 \x01(\x02\x12\x0c\n\x04unit\x18\x04 \x01(\t\x12\x16\n\x0estatus_bitmask\x18\x05 \x01(\r\x12\x17\n\x0fsequence_number\x18\x06 \x01(\x05\"\xaf\x01\n\x0cPressureData\x12\x11\n\tsensor_id\x18\x01 \x01(\t\x12$\n\tsubsystem\x18\x02 \x01(\x0e\x32\x11.telemetry.System\x12\x10\n\x08pressure\x18\x03 \x01(\x02\x12\x0c\n\x04unit\x18\x04 \x01(\t\x12\x16\n\x0estatus_bitmask\x18\x05 \x01(\r\x12\x15\n\rleak_detected\x18\x06 \x01(\x08\x12\x17\n\x0fsequence_number\x18\x07 \x01(\x05\"\xd9\x01\n\x0cVelocityData\x12\x11\n\tsensor_id\x18\x01 \x01(\t\x12$\n\tsubsystem\x18\x02 \x01(\x0e\x32\x11.telemetry.System\x12\x12\n\nvelocity_x\x18\x03 \x01(\x02\x12\x12\n\nvelocity_y\x18\x04 \x01(\x02\x12\x12\n\nvelocity_z\x18\x05 \x01(\x02\x12\x0c\n\x04unit\x18\x06 \x01(\t\x12\x15\n\rvibration_mag\x18\x07 \x01(\x02\x12\x16\n\x0estatus_bitmask\x18\x08 \x01(\r\x12\x17\n\x0fsequence_number\x18\t \x01(\x05*z\n\x06System\x12\x12\n\x0eUNKNOWN_SYSTEM\x10\x00\x12\n\n\x06\x45NGINE\x10\x01\x12\r\n\tFUEL_TANK\x10\x02\x12\x0c\n\x08\x41VIONICS\x10\x03\x12\r\n\tTURBOPUMP\x10\x04\x12\x0c\n\x08GUIDANCE\x10\x05\x12\n\n\x06STAGE1\x10\x06\x12\n\n\x06STAGE2\x10\x07*I\n\rTelemetryType\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x0f\n\x0bTEMPERATURE\x10\x01\x12\x0c\n\x08PRESSURE\x10\x02\x12\x0c\n\x08VELOCITY\x10\x03\x32\x65\n\x10TelemetryService\x12Q\n\x12GetTelemetryStream\x12\x1b.telemetry.TelemetryRequest\x1a\x1c.telemetry.TelemetryResponse0\x01\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'telemetry_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
-  _globals['_SYSTEM']._serialized_start=839
-  _globals['_SYSTEM']._serialized_end=961
-  _globals['_TELEMETRYTYPE']._serialized_start=963
-  _globals['_TELEMETRYTYPE']._serialized_end=1023
+  _globals['_SYSTEM']._serialized_start=853
+  _globals['_SYSTEM']._serialized_end=975
+  _globals['_TELEMETRYTYPE']._serialized_start=977
+  _globals['_TELEMETRYTYPE']._serialized_end=1050
   _globals['_TELEMETRYREQUEST']._serialized_start=30
   _globals['_TELEMETRYREQUEST']._serialized_end=48
   _globals['_TELEMETRYRESPONSE']._serialized_start=51
-  _globals['_TELEMETRYRESPONSE']._serialized_end=278
-  _globals['_TEMPERATUREDATA']._serialized_start=281
-  _globals['_TEMPERATUREDATA']._serialized_end=439
-  _globals['_PRESSUREDATA']._serialized_start=442
-  _globals['_PRESSUREDATA']._serialized_end=617
-  _globals['_VELOCITYDATA']._serialized_start=620
-  _globals['_VELOCITYDATA']._serialized_end=837
-  _globals['_TELEMETRYSERVICE']._serialized_start=1025
-  _globals['_TELEMETRYSERVICE']._serialized_end=1126
+  _globals['_TELEMETRYRESPONSE']._serialized_end=292
+  _globals['_TEMPERATUREDATA']._serialized_start=295
+  _globals['_TEMPERATUREDATA']._serialized_end=453
+  _globals['_PRESSUREDATA']._serialized_start=456
+  _globals['_PRESSUREDATA']._serialized_end=631
+  _globals['_VELOCITYDATA']._serialized_start=634
+  _globals['_VELOCITYDATA']._serialized_end=851
+  _globals['_TELEMETRYSERVICE']._serialized_start=1052
+  _globals['_TELEMETRYSERVICE']._serialized_end=1153
 # @@protoc_insertion_point(module_scope)

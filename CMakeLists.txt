@@ -24,7 +24,8 @@ message(STATUS "Protobuf include: ${Protobuf_INCLUDE_DIRS}")
 set(PROTO_FILES telemetry.proto)
 set(PROTO_SRCS)
 set(PROTO_HDRS)
-
+set(GENERATED_FILES)
+ 
 foreach(proto_file ${PROTO_FILES})
     get_filename_component(proto_name ${proto_file} NAME_WE)
     set(proto_srcs "${CMAKE_CURRENT_BINARY_DIR}/${proto_name}.pb.cc")
@@ -44,7 +45,10 @@ foreach(proto_file ${PROTO_FILES})
     
     list(APPEND PROTO_SRCS ${proto_srcs} ${grpc_srcs})
     list(APPEND PROTO_HDRS ${proto_hdrs} ${grpc_hdrs})
+    list(APPEND GENERATED_FILES ${proto_srcs} ${proto_hdrs} ${grpc_srcs} ${grpc_hdrs})
 endforeach()
+
+add_custom_target(generate_protos ALL DEPENDS ${GENERATED_FILES})
 
 # Server executable
 add_executable(telemetry_server 
@@ -60,6 +64,8 @@ target_link_libraries(telemetry_server
 target_include_directories(telemetry_server PRIVATE 
     ${CMAKE_CURRENT_BINARY_DIR}
 )
+
+add_dependencies(telemetry_server generate_protos)
 
 # Client executable
 # add_executable(telemetry_client 

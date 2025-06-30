@@ -15,9 +15,10 @@ enum System {
 }
 
 enum TelemetryType {
-    TEMPERATURE = 0;
-    PRESSURE = 1;
-    VELOCITY = 2;
+    UNKNOWN = 0;
+    TEMPERATURE = 1;
+    PRESSURE = 2;
+    VELOCITY = 3;
 }
 
 service TelemetryService {
@@ -33,7 +34,7 @@ message TelemetryRequest {
 message TelemetryResponse {
     string timestamp = 1;
     
-    TelemetryType type = 4;
+    optional TelemetryType type = 4;
     
     // Use oneof for type-specific data
     oneof data {

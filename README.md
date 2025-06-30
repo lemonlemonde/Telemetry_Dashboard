@@ -12,7 +12,7 @@ brew install cmake boost postgresql
 python3 -m venv .venv
 source .venv/bin/activate
 
-python -m pip install wheel grcpio grpcio-tools
+python -m pip install wheel grcpio grpcio-tools "fastapi[standard]"
 ```
 
 ## Quick start
@@ -64,5 +64,8 @@ cd build
 
 
 ## Future improvements
+- [ ] Push to DB in batches. (We don't need streaming here)
+- [ ] Requirements.txt instead of whatever that is
+- [ ] Better organize python gRPC files...
 - [ ] Make enums for units
 - [ ] Separate enums for subsystems?

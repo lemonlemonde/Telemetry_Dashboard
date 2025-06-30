@@ -196,6 +196,8 @@ if __name__ == "__main__":
             telem_dict = process_data(telem_response)
             push_to_db(telem_dict, conn, cur)
             
+            # TODO: /POST to dashboard backend
+            
     except grpc.RpcError as e:
         print(f"Oh no! gRPC error: {e}")
     finally:

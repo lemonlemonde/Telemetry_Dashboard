@@ -67,6 +67,11 @@ source .venv/bin/activate
 uvicorn backend:app --reload
 ```
 
+**dashboard frontend:**
+```shell
+cd frontend/telemetry_dashboard
+npm run dev
+```
 
 
 ## Versioning
@@ -75,7 +80,10 @@ uvicorn backend:app --reload
 
 
 ## Future improvements
+- [ ] Need another Redux slice for actual `isStreaming` (websocket state), and change current toggle to `toggleOn` or something
+- [ ] Redis queue for backpressure
 - [ ] Push to DB in batches. (We don't need streaming here)
+- [ ] Check this out: https://github.com/encode/broadcaster
 - [ ] Requirements.txt instead of whatever that is
 - [ ] Better organize python gRPC files...
 - [ ] Make enums for units

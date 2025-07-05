@@ -9,6 +9,8 @@ import requests
 import typing
 import json
 from pprint import pprint
+import time
+from functools import wraps
 
 
 
@@ -42,7 +44,22 @@ DB_VELOCITY_COLS = [
     'vibration_magnitude',
 ]
 
+accum_perc = 1
+count = 1
 
+
+def timing_decorator(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        start_time = time.perf_counter()
+        # the actual func we're wrapping
+        result = func(*args, **kwargs)
+        end_time = time.perf_counter()
+        print(f"[TIMING] [{func.__name__}] : {end_time - start_time:.4f} seconds!")
+        return result, (end_time - start_time)
+    return wrapper
+
+@timing_decorator
 def process_data(telem_response) -> dict:
     
     def process_temp_data():
@@ -158,6 +175,7 @@ def process_data(telem_response) -> dict:
     #     process_unknown_data()
         
 
+@timing_decorator
 def push_to_db(telem_dict: dict, conn, cur):
     no_null_dict = {k: v for k, v in telem_dict.items() if v is not None}
     
@@ -168,8 +186,15 @@ def push_to_db(telem_dict: dict, conn, cur):
     placeholders = ','.join(['%s'] * len(telem_vals))
     
     # the `,` is important! needs to be interpreted as a tuple
-    sql = f"INSERT INTO telemetry_data ({telem_headers}) VALUES ({placeholders});"
+    sql = f"EXPLAIN ANALYZE INSERT INTO telemetry_data ({telem_headers}) VALUES ({placeholders});"
     cur.execute(sql, telem_vals)
+    
+    # get the EXPLAIN ANALYZE plan
+    plan = cur.fetchall()
+    print("----- SQL plan start -----")
+    for row in plan:
+        print(row[0])
+    print("----- SQL plan end -----")
 
     # this is important!
     conn.commit()
@@ -196,10 +221,17 @@ if __name__ == "__main__":
         for telem_response in stream:
             print(f"Received [{telem_response.timestamp}]")
             
-            telem_dict = process_data(telem_response)
-            push_to_db(telem_dict, conn, cur)
+            telem_dict, time_process = process_data(telem_response)
+            time_push = push_to_db(telem_dict, conn, cur)
+            print(f"time process: {time_process}")
+            print(f"time push: {time_push[1]}")
+            print(f"percentage diff for push: {time_push[1] / time_process}")
+            accum_perc += (time_push[1] / time_process)
+            count += 1
+            accum_perc /= count
+            print(f"Running avg perc diff: {accum_perc}")
             
-            # TODO: /POST to dashboard backend
+            # /POST to dashboard backend
             json_str = json.dumps(telem_dict)
             print(json_str)
             dashboard_response = requests.post(url='http://127.0.0.1:8000/telem_data', json=telem_dict)

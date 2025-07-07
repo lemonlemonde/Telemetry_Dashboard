@@ -13,6 +13,7 @@ python3 -m venv .venv
 source .venv/bin/activate
 
 pip install wheel grcpio grpcio-tools
+pip install "psycopg[binary]"
 pip install "fastapi[standard]" uvicorn
 
 npm install
@@ -71,7 +72,16 @@ uvicorn backend:app --reload
 ```shell
 cd frontend/telemetry_dashboard
 npm run dev
+# go to http://localhost:3000 on browser
 ```
+
+## Tech stack
+- gRPC
+- postgres (psycopg (3))
+- FastAPI
+- uvicorn
+- React (Next.JS)
+- Redux
 
 
 ## Versioning
@@ -80,6 +90,8 @@ npm run dev
 
 
 ## Future improvements
+- [ ] Connect to https://celestrak.org/
+- [ ] SQL Alchemy ORM
 - [ ] Need another Redux slice for actual `isStreaming` (websocket state), and change current toggle to `toggleOn` or something
 - [ ] Redis queue for backpressure
 - [ ] Push to DB in batches. (We don't need streaming here)

@@ -134,7 +134,7 @@ def process_data(telem_response) -> dict:
 
 
 # @timing_decorator
-async def push_to_db(cur, db_buffer):
+async def push_to_db(aconn, cur, db_buffer):
     # TODO: format for COPY insert via psycopg3
     # 	records = [(10, 20, "hello"), (40, None, "world")]
 	#   with cursor.copy("COPY sample (col1, col2, col3) FROM STDIN") as copy:
@@ -144,12 +144,13 @@ async def push_to_db(cur, db_buffer):
     print("------- [ I T  I S  T I M E ] -------")
     telem_headers = ','.join(DB_ALL_COLS)
     
-    print("")
-    
     sql = f"COPY telemetry_data ({telem_headers}) FROM STDIN;"
     async with cur.copy(sql) as copy:
         for record in db_buffer:
             await copy.write_row(record)
+            
+    # i think I need to commit...
+    await aconn.commit()
     print("------- [ I T  I S  D O N E ] -------")
 
 async def run_db_batching(aconn):
@@ -164,7 +165,7 @@ async def run_db_batching(aconn):
                 print("[run_db_batching] : Woke up!")
                 async with db_buffer_lock:
                     # await asyncio.get_running_loop().run_in_executor(None, push_to_db, cur, db_buffer)
-                    await push_to_db(cur, db_buffer)
+                    await push_to_db(aconn, cur, db_buffer)
                     db_buffer.clear()
         except Exception as e:
             print(f"[ERROR] [run_db_batching] : {e}")
@@ -197,7 +198,7 @@ async def run_grpc_stream(aconn):
                     async with db_buffer_lock:
                         if len(db_buffer) >= MAX_BATCH_SIZE:
                             # await asyncio.get_running_loop().run_in_executor(None, push_to_db, cur, db_buffer)
-                            await push_to_db(cur, db_buffer)
+                            await push_to_db(aconn, cur, db_buffer)
                             db_buffer.clear()
                     
                     

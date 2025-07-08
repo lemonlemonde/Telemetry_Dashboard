@@ -21,10 +21,13 @@ A simulated telemetry pipeline (`server --> processing node --> database and bac
 
 ## Dependencies
 
-- Note this is on macOS, i9
+- Note this is on macOS, i9, Ventura 13.5.2
 - Follow gRPC C++ installation instructions, install into relative dir `.local`
     - most recent (as of June 24, 2025) protobuf version is == 6031000 == 31.0 (https://github.com/grpc/grpc/releases/tag/v1.73.0).
     - may run into version issues if multiple versions of `protobuf` installed
+- Follow Redis installation instructions
+    - https://redis.io/docs/latest/operate/oss_and_stack/install/install-stack/homebrew/
+
 - more things:
 
 ```shell
@@ -36,6 +39,7 @@ source .venv/bin/activate
 pip install wheel grcpio grpcio-tools
 pip install "psycopg[binary]"
 pip install "fastapi[standard]" uvicorn
+pip install redis
 
 npm install
 ```
@@ -94,6 +98,11 @@ uvicorn backend:app --reload
 cd frontend/telemetry_dashboard
 npm run dev
 # go to http://localhost:3000 on browser
+```
+
+**redis**
+```shell
+redis-server /usr/local/etc/redis.conf
 ```
 
 

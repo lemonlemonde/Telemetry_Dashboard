@@ -149,7 +149,6 @@ async def push_to_db(aconn, cur, db_buffer):
         for record in db_buffer:
             await copy.write_row(record)
             
-    # i think I need to commit...
     await aconn.commit()
     print("------- [ I T  I S  D O N E ] -------")
 
@@ -194,10 +193,8 @@ async def run_grpc_stream(aconn):
                     # print(f"time process: {time_process}")
                     
                     await add_to_batch(telem_dict)
-                    # avoid deadlock with `push_to_db()`
                     async with db_buffer_lock:
                         if len(db_buffer) >= MAX_BATCH_SIZE:
-                            # await asyncio.get_running_loop().run_in_executor(None, push_to_db, cur, db_buffer)
                             await push_to_db(aconn, cur, db_buffer)
                             db_buffer.clear()
                     

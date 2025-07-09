@@ -1,7 +1,7 @@
 
 ## What is this??
 A simulated telemetry pipeline (`server --> processing node --> database and backend --> frontend`).
-Learning project, and is not 
+Learning project with simulated data, so no use case yet...!
 
 - C++ multithreaded server generating simulated data
 - Sent via gRPC to a Python client that runs coroutines in order to:
@@ -13,11 +13,13 @@ Learning project, and is not
 
 ## Tech stack
 - gRPC
+- Redis
 - postgres (psycopg (3))
 - FastAPI
 - uvicorn
 - React (Next.js)
 - Redux
+- Prometheus
 
 
 ## Dependencies

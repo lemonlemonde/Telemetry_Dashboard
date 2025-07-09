@@ -42,10 +42,11 @@ DB_ALL_COLS = [
 ]
 
 # in seconds
-BATCH_INTERVAL = 100
-MAX_BATCH_SIZE = 50
+BATCH_INTERVAL = 10
+MAX_BATCH_SIZE = 20
 db_buffer = []
-db_buffer_lock = asyncio.Lock()
+did_max_out = False
+
 
 
 def timing_decorator(func):
@@ -133,7 +134,7 @@ def dictionarize_data(telem_response) -> dict:
 
 async def process_data(telem_dict) -> dict:
     # TODO: do some dummy processing for testing
-    await asyncio.sleep(2)
+    await asyncio.sleep(0.05)
     return telem_dict
 
 
@@ -153,24 +154,27 @@ async def push_to_db(aconn, cur, db_buffer):
     await aconn.commit()
     print("------- [ I T  I S  D O N E ] -------")
 
-async def run_db_batching(aconn):
-    global db_buffer
+async def run_db_batching(db_buffer_lock, aconn):
+    global db_buffer, did_max_out
     
     print("[run_db_batching] : Starting!")
     async with aconn.cursor() as cur:
         try:
             while True:
+                async with db_buffer_lock:
+                    did_max_out = False
                 print("[run_db_batching] : Going to sleep...")
                 await asyncio.sleep(BATCH_INTERVAL)
                 print("[run_db_batching] : Woke up!")
                 async with db_buffer_lock:
-                    await push_to_db(aconn, cur, db_buffer)
-                    db_buffer.clear()
+                    if not did_max_out:
+                        await push_to_db(aconn, cur, db_buffer)
+                        db_buffer.clear()
         except Exception as e:
             print(f"[ERROR] [run_db_batching] : {e}")
 
 
-async def add_to_batch(telem_dict: dict):
+async def add_to_batch(db_buffer_lock: asyncio.Lock, telem_dict: dict):
     async with db_buffer_lock:
         db_buffer.append(tuple(telem_dict.values()))
 
@@ -210,7 +214,9 @@ async def run_grpc_stream():
             # channel.close()
 
 
-async def run_redis_reader(aconn):
+async def run_redis_reader(db_buffer_lock, aconn):
+    global did_max_out
+    
     r = aioredis.Redis(host='localhost', port=6379, decode_responses=True)
     while True:
         async with aconn.cursor() as cur:
@@ -223,9 +229,10 @@ async def run_redis_reader(aconn):
             telem_dict = await process_data(telem_dict)
                             
             # add to db batch list
-            await add_to_batch(telem_dict)
+            await add_to_batch(db_buffer_lock, telem_dict)
             async with db_buffer_lock:
                 if len(db_buffer) >= MAX_BATCH_SIZE:
+                    did_max_out = True
                     await push_to_db(aconn, cur, db_buffer)
                     db_buffer.clear()
                             
@@ -234,6 +241,8 @@ async def run_redis_reader(aconn):
 
 
 async def main():
+    db_buffer_lock = asyncio.Lock()
+    
     # connect to db
     async with await psycopg.AsyncConnection.connect(
         dbname='telemetry',
@@ -241,7 +250,7 @@ async def main():
         password='',
         host='localhost'
     ) as aconn:
-        await asyncio.gather(run_grpc_stream(), run_db_batching(aconn), run_redis_reader(aconn))
+        await asyncio.gather(run_grpc_stream(), run_db_batching(db_buffer_lock, aconn), run_redis_reader(db_buffer_lock, aconn))
     
 
 if __name__ == "__main__":

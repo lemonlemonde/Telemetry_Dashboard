@@ -2,8 +2,12 @@ import typing
 import json
 from pprint import pprint
 import time
+from datetime import datetime, timezone
+from dateutil.parser import isoparse
+import dateutil
 from functools import wraps
 
+import dateutil.utils
 import requests
 import asyncio
 
@@ -15,6 +19,19 @@ import telemetry_pb2_grpc
 
 import psycopg
 import redis.asyncio as aioredis
+
+from prometheus_client import start_http_server, Histogram, Gauge
+
+# prometheus metrics
+# TODO: tune the buckets..
+DB_INSERT_TIME = Histogram('db_insertion_seconds', 'Time (seconds) spent on inserting into database.', buckets=[0.007, 0.008, 0.0085, 0.009, 0.0092, 0.0094, 0.0096, 0.0098, 0.01, 0.011, 0.012, 0.015, 0.02, 0.08, 0.1, 0.2])
+    # mostly 0.0095
+LATENCY_TO_DB_INSERT = Histogram('latency_to_db_insert', 'Time from data creation to db insertion.', buckets=[0.01, 0.05, 0.1, 0.25, 0.5, 1, 2, 5, 10, 20])
+    # 4~6
+DATA_DICTIONARIZE_TIME = Histogram('data_dictionarize_seconds', 'Time (seconds) spent turning raw data from gRPC into a dictionary.', buckets=[0.007, 0.008, 0.0085, 0.009, 0.0092, 0.0094, 0.0096, 0.0098, 0.01, 0.011, 0.012, 0.015, 0.02, 0.08, 0.1, 0.2])
+    # mostly 0.0095
+REDIS_QUEUE_LENGTH = Gauge('redis_queue_len', 'Length of Redis queue, indicating backpressure from gRPC server.')
+    # 1 - 11 (at start)
 
 
 DEBUG = False
@@ -48,19 +65,19 @@ db_buffer = []
 did_max_out = False
 
 
+# NOTE: replaced with Prometheus :)
+# def timing_decorator(func):
+#     @wraps(func)
+#     def wrapper(*args, **kwargs):
+#         start_time = time.perf_counter()
+#         # the actual func we're wrapping
+#         result = func(*args, **kwargs)
+#         end_time = time.perf_counter()
+#         print(f"[TIMING] [{func.__name__}] : {end_time - start_time:.4f} seconds!")
+#         return result, (end_time - start_time)
+#     return wrapper
 
-def timing_decorator(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        start_time = time.perf_counter()
-        # the actual func we're wrapping
-        result = func(*args, **kwargs)
-        end_time = time.perf_counter()
-        print(f"[TIMING] [{func.__name__}] : {end_time - start_time:.4f} seconds!")
-        return result, (end_time - start_time)
-    return wrapper
-
-@timing_decorator
+@DATA_DICTIONARIZE_TIME.time()
 def dictionarize_data(telem_response) -> dict:
     def process_unknown_data():
         raise NotImplementedError(f"Data processing not implemented for telemetry type: {telem_response.type}")
@@ -138,17 +155,23 @@ async def process_data(telem_dict) -> dict:
     return telem_dict
 
 
-# @timing_decorator
+@DB_INSERT_TIME.time()
 async def push_to_db(aconn, cur, db_buffer):
     # COPY insert via psycopg3
     print("------- [ I T  I S  T I M E ] -------")
     telem_headers = ','.join(DB_ALL_COLS)
     
     print(f"Committing {len(db_buffer)} rows...")
+    time_now = datetime.now(timezone.utc)
+    print(f"Now: {time_now}")
     
     sql = f"COPY telemetry_data ({telem_headers}) FROM STDIN;"
     async with cur.copy(sql) as copy:
         for record in db_buffer:
+            time_record = isoparse(record[0])
+            time_diff = time_now - time_record
+            LATENCY_TO_DB_INSERT.observe(time_diff.total_seconds())
+            
             await copy.write_row(record)
             
     await aconn.commit()
@@ -196,8 +219,7 @@ async def run_grpc_stream():
                 print(f"Received [{telem_response.timestamp}]")
                 
                 # turn data into dictionary
-                telem_dict, time_dictionarize = dictionarize_data(telem_response)
-                # print(f"time dictionarize: {time_dictionarize}")
+                telem_dict = dictionarize_data(telem_response)
                 
                 # jsonify
                 telem_json_str = json.dumps(telem_dict)
@@ -206,6 +228,7 @@ async def run_grpc_stream():
                 r_len = await r.lpush('queue:telemetry', telem_json_str)
                 
                 print(f"Length of redis queue now: {r_len}")
+                REDIS_QUEUE_LENGTH.set(r_len)
                 
         except grpc.RpcError as e:
             print(f"Oh no! gRPC error: {e}")
@@ -226,7 +249,7 @@ async def run_redis_reader(db_buffer_lock, aconn):
             # print(f"Popped from redis queue: {telem_dict}")
             
             # do some processing (dummy for now)
-            telem_dict = await process_data(telem_dict)
+            # telem_dict = await process_data(telem_dict)
                             
             # add to db batch list
             await add_to_batch(db_buffer_lock, telem_dict)
@@ -254,4 +277,10 @@ async def main():
     
 
 if __name__ == "__main__":
+    # start prometheus endpoint
+    server, t = start_http_server(8001)
+    
     asyncio.run(main())
+    
+    server.shutdown()
+    t.join()

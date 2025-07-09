@@ -83,32 +83,32 @@ std::vector<std::tuple<std::string, telemetry::TelemetryType, telemetry::System,
         telemetry::TelemetryType::TEMPERATURE, 
         telemetry::System::ENGINE, 
         "celsius",
-        900
+        10
     ),
     std::make_tuple(
         "TEMP_FUEL_001",
         telemetry::TelemetryType::TEMPERATURE,
         telemetry::System::FUEL_TANK,
         "celsius",
-        500
+        80
     ),
     std::make_tuple("PRESS_ENG_001",
         telemetry::TelemetryType::PRESSURE,
         telemetry::System::ENGINE,
         "bar",
-        200
+        40
     ),
     std::make_tuple("PRESS_FUEL_002",
         telemetry::TelemetryType::PRESSURE,
         telemetry::System::FUEL_TANK,
         "bar",
-        100
+        20
     ),
     std::make_tuple("VELO_STAGE1_001",
         telemetry::TelemetryType::VELOCITY,
         telemetry::System::STAGE1,
         "m/s",
-        400
+        10
     ),
 };
 // Sensor threads for cleanup (join())

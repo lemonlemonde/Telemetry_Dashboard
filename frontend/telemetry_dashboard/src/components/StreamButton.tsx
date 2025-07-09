@@ -11,9 +11,26 @@ export default function StreamButton() {
     const url = useRef<HTMLInputElement | null>(null);
     const client_id = useRef<HTMLInputElement | null>(null);
 
+    var latency_total = 0
+    var msg_count = 0
+
     const onMessage = (event: MessageEvent) => {
-        // TODO: do something
-        console.log("Received telemetry!!");
+        const telem_dict = JSON.parse(String(event));
+        setUserMsg(event);
+
+        const time_sent = Date.parse(telem_dict['reading_timestamp']);
+        const time_received = Date.now();
+
+        const time_diff_s = (time_received - time_sent) / 1000;
+        console.log("Latency:", time_diff_s);
+
+        latency_total += time_diff_s;
+        msg_count += 1;
+
+        const latency_avg = latency_total / msg_count;
+        console.log("Avg Latency:", latency_avg)
+        
+        // setUserMsg to the data + latency
     };
 
     const stream_conn = StreamConnection(url, client_id, setUserMsg, onMessage);

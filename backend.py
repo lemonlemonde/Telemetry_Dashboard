@@ -1,3 +1,4 @@
+import json
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -86,8 +87,10 @@ async def post_data(telem_dict: TelemetryData):
     # TODO: type enforce the telem dict with the type
     # print(telem_dict)
     
-    # TODO: broadcast new data to frontend via web socket connection
-    await manager.broadcast(f"{telem_dict}")
+    # broadcast new data to frontend via web socket connection
+    telem_json = telem_dict.model_dump_json()
+    print(f"Broadcasting: `{telem_json}`")
+    await manager.broadcast(f"{telem_json}")
     
     return {
         "msg": "got it!<3",

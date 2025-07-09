@@ -42,7 +42,7 @@ export function StreamConnection(
                 
                 ws.current.onmessage = (event: MessageEvent) => {
                     onMessage(event.data);
-                    setUserMsg(event.data);
+                    // setUserMsg(event.data);
                 };
                 
                 ws.current.onclose = (event: CloseEvent) => {

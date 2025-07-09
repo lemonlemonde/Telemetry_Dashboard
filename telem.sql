@@ -113,13 +113,13 @@ CREATE TABLE IF NOT EXISTS telemetry_data (
 
 
 -- mhm
-DROP VIEW IF EXISTS latest_telemetry;
+-- DROP VIEW IF EXISTS latest_telemetry;
 
--- ease of use for dashboard
-CREATE VIEW latest_telemetry AS
-    SELECT DISTINCT ON (sensor_id, telemetry_type) *
-        FROM telemetry_data
-        ORDER BY sensor_id, telemetry_type, reading_timestamp DESC;
+-- -- ease of use for dashboard
+-- CREATE VIEW latest_telemetry AS
+--     SELECT DISTINCT ON (sensor_id, telemetry_type) *
+--         FROM telemetry_data
+--         ORDER BY sensor_id, telemetry_type, reading_timestamp DESC;
 
 
 

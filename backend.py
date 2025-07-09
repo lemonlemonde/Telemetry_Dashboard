@@ -1,11 +1,20 @@
 import json
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
 
 from pydantic import BaseModel, Field
 from typing import Union, Literal, Annotated, Optional
         
 import asyncio
+
+from prometheus_client import start_http_server, Histogram
+
+LATENCY_END_TO_END = Histogram('latency_end_to_end', 'Time (seconds) from data creation to reception on frontend.')
+
+class Latency(BaseModel):
+    latency: float
+
 class TelemetryBase(BaseModel):
     reading_timestamp: str
     sensor_id: str
@@ -41,15 +50,6 @@ TelemetryData = Annotated[
     Field(discriminator='telemetry_type')
 ]
 
-app = FastAPI()
-
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=["http://localhost:3000"],  # Add your frontend origin here
-#     allow_credentials=True,
-#     allow_methods=["*"],
-#     allow_headers=["*"],
-# )
 
 class ConnectionManager:
     def __init__(self):
@@ -80,7 +80,29 @@ class ConnectionManager:
                 
 
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # on startup
+    # start prometheus endpoint
+    server, t = start_http_server(8002)
+    
+    yield
+
+    # on shutdown
+    server.shutdown()
+    t.join()
+
+app = FastAPI(lifespan=lifespan)
 manager = ConnectionManager()
+
+# add NextJS frontend for /latency
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.post("/telem_data")
 async def post_data(telem_dict: TelemetryData):
@@ -98,6 +120,17 @@ async def post_data(telem_dict: TelemetryData):
         "sensor_id": telem_dict.sensor_id,
     }
     
+    
+@app.post("/latency")
+async def post_latency(data: Latency):
+    LATENCY_END_TO_END.observe(data.latency)
+    
+    print(f"Received frontend latency: {data.latency}")
+    
+    return {
+        "msg": "latency logged! <3",
+        "latency": str(data.latency),
+    }
     
     
 # directly from example:
@@ -117,9 +150,3 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
     except Exception as e:
         manager.disconnect(websocket)
         print(e)
-        
-
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)

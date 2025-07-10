@@ -88,6 +88,7 @@ uvicorn backend:app --reload
 cd frontend/telemetry_dashboard
 npm run dev
 # go to http://localhost:3000 on browser
+	# click 'start streaming'
 ```
 
 **redis**
@@ -149,6 +150,11 @@ cd ~/prometheus-*
 	- `histogram_quantile(0.95, rate(latency_end_to_end_bucket[1m]))`
 
 
+**Clean up**
+```shell
+brew services stop postgresql
+redis-cli shutdown
+```
 
 
 ## Versioning
@@ -161,6 +167,11 @@ cd ~/prometheus-*
 
 ## TODO:
 - [x] **< FEATURE >:** *Redis queue buffer to reduce backpressure from gRPC server-->client*
+- [ ] **< BUG >:** use an asynchronous version of `requests.post` in `run_redis_reader()` for POSTing to `backend.py`!!!
+- [ ] **< BUG >:** `server.cpp`'s queue is causing the most latency!!
+- [ ] **< BUG >:** `client.py`'s `dictionarize`'s `MessageToDict()` is taking a lot of time!
+	- I already enforced the schema
+	- so just read the data directly!!!
 - [ ] **< TODO >:** *Bottleneck analysis*
 	- `client.py`: [[cProfile]], `yappi` (better for async?), or more [[Python timing decorators]]
 	- use `prometheus_client` for various metrics of db and queue sizes

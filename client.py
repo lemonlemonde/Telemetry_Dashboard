@@ -24,9 +24,9 @@ from prometheus_client import start_http_server, Histogram, Gauge
 
 # prometheus metrics
 # TODO: tune the buckets..
-DB_INSERT_TIME = Histogram('db_insertion_seconds', 'Time (seconds) spent on inserting into database.', buckets=[0.007, 0.008, 0.0085, 0.009, 0.0092, 0.0094, 0.0096, 0.0098, 0.01, 0.011, 0.012, 0.015, 0.02, 0.08, 0.1, 0.2])
+DB_INSERT_TIME = Histogram('db_insertion_seconds', 'Time (seconds) spent on inserting into database.', buckets=[0.007, 0.008, 0.0085, 0.009, 0.0092, 0.0094, 0.0096, 0.0098, 0.01, 0.011, 0.012, 0.015, 0.02, 0.08, 0.1, 0.2, 0.3, 0.4, 0.5, 0.8, 1.0, 2.0, 4.0, 10.0])
     # mostly 0.0095
-LATENCY_TO_DB_INSERT = Histogram('latency_to_db_insert', 'Time from data creation to db insertion.', buckets=[0.01, 0.05, 0.1, 0.25, 0.5, 1, 2, 5, 10, 20])
+LATENCY_TO_DB_INSERT = Histogram('latency_to_db_insert', 'Time from data creation to db insertion.', buckets=[0.01, 0.05, 0.1, 0.25, 0.5, 1, 2, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 150, 200])
     # 4~6
 DATA_DICTIONARIZE_TIME = Histogram('data_dictionarize_seconds', 'Time (seconds) spent turning raw data from gRPC into a dictionary.', buckets=[0.007, 0.008, 0.0085, 0.009, 0.0092, 0.0094, 0.0096, 0.0098, 0.01, 0.011, 0.012, 0.015, 0.02, 0.08, 0.1, 0.2])
     # mostly 0.0095

@@ -4,10 +4,12 @@ import threading
 
 from pynput import keyboard
     
-logger = logging.getLogger(__name__)
+
 
 # non-blocking thread
 def start_keyboard_listener(stop_event: threading.Event):
+    logger = logging.getLogger(__name__)
+    logger.info("Starting keyboard listener! 🎹")
     num_keys = 0
     
     # https://pynput.readthedocs.io/en/latest/keyboard.html
@@ -24,10 +26,7 @@ def start_keyboard_listener(stop_event: threading.Event):
             num_keys += 1
 
     def on_release(key):
-        if key == keyboard.Key.esc:
-            # TODO: Stop listener based on some other event
-            stop_event.set()
-            return False
+        pass
         
     # start listener
     listener = keyboard.Listener(
@@ -44,6 +43,8 @@ def start_keyboard_listener(stop_event: threading.Event):
         logger.info(f'KPM: {num_keys}')
         
     # close out at stop event
-    logger.info("Closing out keyboard listener")
     listener.stop()
     listener.join()
+    
+    logger.info("Stopping keyboard listener! 🎹")
+    

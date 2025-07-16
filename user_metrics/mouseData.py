@@ -3,9 +3,10 @@ import math
 import logging
 from datetime import datetime, timezone, timedelta
 
-logger = logging.getLogger(__name__)
-
 def start_mouse_listener(stop_event):
+    logger = logging.getLogger(__name__)
+    logger.info("Starting mouse listener! 🐭")
+    
     
     num_clicks = 0
     
@@ -29,7 +30,7 @@ def start_mouse_listener(stop_event):
             speed_avg = ((speed_avg * num_secs) + dist_move) / (num_secs + 1)
             num_secs += 1
         
-            logger.info(f'[{now_time}] : Avg speed: {speed_avg}')
+            logger.info(f'Avg speed: {speed_avg}')
             
         
 
@@ -38,9 +39,8 @@ def start_mouse_listener(stop_event):
         
         num_clicks += 1
         
-        logger.info('{0} at {1}'.format(
-            'Pressed' if pressed else 'Released',
-            (x, y)))
+        logger.info('{0} mouse'.format(
+            'Pressed' if pressed else 'Released'))
 
     def on_scroll(x, y, dx, dy):
         pass
@@ -68,3 +68,5 @@ def start_mouse_listener(stop_event):
     logger.info("Closing out mouse listener.")
     listener.stop()
     listener.join()
+    
+    logger.info("Stoppin mouse listener! 🐭")

@@ -5,9 +5,9 @@ set(CMAKE_CXX_STANDARD 17)
 
 # homebrew installed version == 5029003 == 29.3
 # the locally installed version (in ./.local) == 6031000 == 31.0
-set(CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/.local")
+set(CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../.local")
 
-set(CMAKE_FIND_ROOT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/.local")
+set(CMAKE_FIND_ROOT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../.local")
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
@@ -38,10 +38,10 @@ foreach(proto_file ${PROTO_FILES})
         COMMAND ${CMAKE_PREFIX_PATH}/bin/protoc
         ARGS --grpc_out "${CMAKE_CURRENT_BINARY_DIR}"
              --cpp_out "${CMAKE_CURRENT_BINARY_DIR}"
-             -I "${CMAKE_CURRENT_SOURCE_DIR}"
+             -I "${CMAKE_CURRENT_SOURCE_DIR}/proto"
              --plugin=protoc-gen-grpc="${CMAKE_PREFIX_PATH}/bin/grpc_cpp_plugin"
-             "${CMAKE_CURRENT_SOURCE_DIR}/${proto_file}"
-        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/${proto_file}")
+             "${CMAKE_CURRENT_SOURCE_DIR}/proto/${proto_file}"
+        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/proto/${proto_file}")
     
     list(APPEND PROTO_SRCS ${proto_srcs} ${grpc_srcs})
     list(APPEND PROTO_HDRS ${proto_hdrs} ${grpc_hdrs})

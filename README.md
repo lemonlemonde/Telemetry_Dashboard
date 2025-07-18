@@ -53,6 +53,7 @@ npm install
 ## Quick start
 **build:**
 ```shell
+cd telemetry
 mkdir build && cd build
 cmake ..
 make
@@ -68,12 +69,13 @@ psql postgres
 postgres-# CREATE DATABASE IF NOT EXISTS telemetry;
 
 # make everything else
+cd data
 psql -U mirujun -d telemetry -f telem.sql
 ```
 
 **server:**
 ```shell
-cd build
+cd telemetry/build
 ./telemetry_server
 ```
 
@@ -107,8 +109,9 @@ DEL queue:telemetry
 **client (python):**
 ```shell
 source .venv/bin/activate
-# in root dir
-python -m grpc_tools.protoc --proto_path=. --python_out=. --grpc_python_out=. telemetry.proto
+
+cd telemetry
+python -m grpc_tools.protoc --proto_path=proto --python_out=proto --grpc_python_out=proto ./proto/telemetry.proto
 python client.py
 
 # if you want to use SnakeViz, etc.
@@ -149,6 +152,18 @@ cd ~/prometheus-*
 	- `histogram_quantile(0.95, rate(data_dictionarize_seconds_bucket[1m]))`
 	- `redis_queue_len`
 	- `histogram_quantile(0.95, rate(latency_end_to_end_bucket[1m]))`
+
+
+
+**User metrics server**
+```sh
+python user_metrics/metrics.py
+```
+- note that this is very dependent on MacOS (AppleScript)
+
+
+
+
 
 
 **Clean up**

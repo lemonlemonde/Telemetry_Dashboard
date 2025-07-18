@@ -14,8 +14,22 @@ import asyncio
 import grpc
 from google.protobuf.json_format import MessageToDict
 
-import telemetry_pb2
-import telemetry_pb2_grpc
+# for protobuf bug
+# https://github.com/grpc/grpc/issues/29459
+import sys
+import os
+def add_to_python_path(new_path):
+    existing_path = sys.path
+    absolute_path = os.path.abspath(new_path)
+    if absolute_path not in existing_path:
+        sys.path.append(absolute_path)
+    return sys.path
+
+file_dir_path = os.path.dirname(os.path.realpath(__file__))
+add_to_python_path(file_dir_path + "/proto")
+
+from proto import telemetry_pb2
+from proto import telemetry_pb2_grpc
 
 import psycopg
 import redis.asyncio as aioredis

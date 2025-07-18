@@ -1,11 +1,4 @@
 
-
-"""
-
-Run from root!! (telemetry_dashboard)!!
-"""
-
-
 from datetime import datetime, timezone
 import time
 
@@ -13,8 +6,9 @@ import sys
 import os
 import threading
 import logging
+file_dir_path = os.path.dirname(os.path.realpath(__file__))
 logging.basicConfig(
-	    filename='logs/metrics.log',
+	    filename=file_dir_path + '/../' + 'logs/metrics.log',
 	    level=logging.INFO,
 	    format='[ %(asctime)s ] [%(levelname)s] [%(name)s] - %(message)s',
 	    datefmt='%Y-%m-%d %H:%M:%S'
@@ -45,7 +39,7 @@ def add_to_python_path(new_path):
         sys.path.append(absolute_path)
     return sys.path
 
-add_to_python_path("./user_metrics/proto")
+add_to_python_path(file_dir_path + "/proto")
 
 from proto import metrics_pb2
 from proto import metrics_pb2_grpc

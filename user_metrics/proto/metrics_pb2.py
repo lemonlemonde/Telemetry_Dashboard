@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\rmetrics.proto\x12\x07metrics\"\x0f\n\rMetricRequest\"V\n\x0eMetricResponse\x12\r\n\x03kpm\x18\x01 \x01(\x05H\x00\x12\r\n\x03pxs\x18\x02 \x01(\x02H\x00\x12\r\n\x03\x63pm\x18\x03 \x01(\x02H\x00\x12\x0f\n\x05title\x18\x04 \x01(\tH\x00\x42\x06\n\x04\x64\x61ta2\xa4\x02\n\rMetricService\x12\x41\n\x0cGetKPMStream\x12\x16.metrics.MetricRequest\x1a\x17.metrics.MetricResponse0\x01\x12H\n\x13GetMouseSpeedStream\x12\x16.metrics.MetricRequest\x1a\x17.metrics.MetricResponse0\x01\x12\x41\n\x0cGetCPMStream\x12\x16.metrics.MetricRequest\x1a\x17.metrics.MetricResponse0\x01\x12\x43\n\x0eGetMediaStream\x12\x16.metrics.MetricRequest\x1a\x17.metrics.MetricResponse0\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\rmetrics.proto\x12\x07metrics\"\x0f\n\rMetricRequest\"i\n\x0eMetricResponse\x12\r\n\x03kpm\x18\x01 \x01(\x05H\x00\x12\r\n\x03pxs\x18\x02 \x01(\x02H\x00\x12\r\n\x03\x63pm\x18\x03 \x01(\x02H\x00\x12\x0f\n\x05title\x18\x04 \x01(\tH\x00\x12\x11\n\ttimestamp\x18\x05 \x01(\tB\x06\n\x04\x64\x61ta2\xa4\x02\n\rMetricService\x12\x41\n\x0cGetKPMStream\x12\x16.metrics.MetricRequest\x1a\x17.metrics.MetricResponse0\x01\x12H\n\x13GetMouseSpeedStream\x12\x16.metrics.MetricRequest\x1a\x17.metrics.MetricResponse0\x01\x12\x41\n\x0cGetCPMStream\x12\x16.metrics.MetricRequest\x1a\x17.metrics.MetricResponse0\x01\x12\x43\n\x0eGetMediaStream\x12\x16.metrics.MetricRequest\x1a\x17.metrics.MetricResponse0\x01\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -34,7 +34,7 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_METRICREQUEST']._serialized_start=26
   _globals['_METRICREQUEST']._serialized_end=41
   _globals['_METRICRESPONSE']._serialized_start=43
-  _globals['_METRICRESPONSE']._serialized_end=129
-  _globals['_METRICSERVICE']._serialized_start=132
-  _globals['_METRICSERVICE']._serialized_end=424
+  _globals['_METRICRESPONSE']._serialized_end=148
+  _globals['_METRICSERVICE']._serialized_start=151
+  _globals['_METRICSERVICE']._serialized_end=443
 # @@protoc_insertion_point(module_scope)

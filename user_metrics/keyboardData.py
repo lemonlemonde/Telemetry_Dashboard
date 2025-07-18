@@ -17,12 +17,12 @@ def start_keyboard_listener(stop_event: threading.Event, queue: MetricQueue):
         nonlocal num_keys
         
         try:
-            logger.info('{0} pressed (alphanumeric)'.format(
-                key.char))
+            # logger.info('{0} pressed (alphanumeric)'.format(
+                # key.char))
             num_keys += 1
         except AttributeError:
-            logger.info('{0} pressed (special)'.format(
-                key))
+            # logger.info('{0} pressed (special)'.format(
+                # key))
             num_keys += 1
 
     def on_release(key):

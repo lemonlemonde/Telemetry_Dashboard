@@ -25,4 +25,5 @@ message MetricResponse {
         float cpm = 3;
         string title = 4;
     }
+    string timestamp = 5;
 }

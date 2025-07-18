@@ -104,47 +104,59 @@ def start_metrics():
 # implement the actual service
 class MetricService(metrics_pb2_grpc.MetricServiceServicer):
     # implement the actual rpc streams
+    # NOTE: when stopping this service,
+        # gracefully, will take up to 20 seconds (due to sleeps)
+        # nongracefully, doesn't matter
     
     # keys per minute
     def GetKPMStream(self, request, context):
         while context.is_active():
             # nonblocking to continuously check active client
-            metric = kpm_queue.get()
-            if metric:
-                yield metric
-            # sleep for a bit
-            time.sleep(20)
+            metric_tuple = kpm_queue.get()
+            if metric_tuple != None:
+                val, timestamp = metric_tuple
+                yield metrics_pb2.MetricResponse(kpm=val, timestamp=timestamp)
+            else:
+                # sleep for a bit
+                # it'll be max 60 seconds until new message
+                time.sleep(20)
 
     
     # pixels per second
     def GetMouseSpeedStream(self, request, context):
         while context.is_active():
             # nonblocking to continuously check active client
-            metric = mouse_speed_queue.get()
-            if metric:
-                yield metric
-            # sleep for a bit
-            time.sleep(0.5)
+            metric_tuple = mouse_speed_queue.get()
+            if metric_tuple != None:
+                val, timestamp = metric_tuple
+                yield metrics_pb2.MetricResponse(pxs=val, timestamp=timestamp)
+            else:
+                # sleep for a bit
+                time.sleep(0.5)
     
     # clicks per minute
     def GetCPMStream(self, request, context):
         while context.is_active():
             # nonblocking to continuously check active client
-            metric = cpm_queue.get()
-            if metric:
-                yield metric
-            # sleep for a bit
-            time.sleep(20)
+            metric_tuple = cpm_queue.get()
+            if metric_tuple != None:
+                val, timestamp = metric_tuple
+                yield metrics_pb2.MetricResponse(cpm=val, timestamp=timestamp)
+            else:
+                # sleep for a bit
+                time.sleep(20)
     
     # active media every 30 sec
     def GetMediaStream(self, request, context):
         while context.is_active():
             # nonblocking to continuously check active client
-            metric = media_queue.get()
-            if metric:
-                yield metric
-            # sleep for a bit
-            time.sleep(10)
+            metric_tuple = media_queue.get()
+            if metric_tuple != None:
+                val, timestamp = metric_tuple
+                yield metrics_pb2.MetricResponse(title=val, timestamp=timestamp)
+            else:
+                # sleep for a bit
+                time.sleep(10)
     
     
     
@@ -190,4 +202,11 @@ if __name__ == '__main__':
     
     metrics_thread.join()
     server_thread.join()
+    
+    print("📐 Remaining queue sizes:")
+    print(f"\t🎹 kpm_queue size: {kpm_queue.get_len()}")
+    print(f"\t🐭 mouse_speed_queue size: {mouse_speed_queue.get_len()}")
+    print(f"\t✅ cpm_queue size: {cpm_queue.get_len()}")
+    print(f"\t🎶 media_queue size: {media_queue.get_len()}")
+    
     logger.info("✨✨ ---- Main thread stop! ---- ✨✨")

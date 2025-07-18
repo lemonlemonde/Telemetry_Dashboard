@@ -1,10 +1,14 @@
 from queue import Queue, Empty, Full
 import logging
 
+from datetime import datetime, timezone
+
 class MetricQueue:
     """
     Queue with behavior:
     - maxsize 10
+    - queue of tuples (val, timestamp)
+    - string timestamp (datetime format, utc timezone) is auto appended during insertion (put())
     - if queue full:
         queue.put(val) discards oldest value at front of queue
         and adds newest value `val`
@@ -19,12 +23,13 @@ class MetricQueue:
         
     def put(self, val) -> None:
         # throw away oldest val if queue full
+        now_time = datetime.now(timezone.utc)
         try:
-            self._queue.put_nowait(val)
+            self._queue.put_nowait((val, str(now_time)))
         except Full:
-            dropped = self._queue.get_nowait()
-            self._queue.put_nowait(val)
-            self._logger.warning(f'Queue ({self._name}) full. Dropped value: {dropped}.')
+            dropped, timestamp = self._queue.get_nowait()
+            self._queue.put_nowait((val, str(now_time)))
+            self._logger.warning(f'Queue ({self._name}) full. Dropped old value: [{dropped}] of timestamp [{timestamp}]')
     
     def get(self):
         # return val or None if empty
@@ -34,3 +39,8 @@ class MetricQueue:
         except Empty:
             self._logger.warning(f'Queue ({self._name}) empty.')
             return None
+        
+    def get_len(self):
+        # qsize() is approximate number of things in the queue
+        # unreliable for multithreading bc it doesn't obtain a lock
+        return self._queue.qsize()

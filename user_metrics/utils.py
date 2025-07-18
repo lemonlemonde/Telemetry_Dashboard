@@ -37,7 +37,7 @@ class MetricQueue:
         try:
             return self._queue.get_nowait()
         except Empty:
-            self._logger.warning(f'Queue ({self._name}) empty.')
+            # self._logger.warning(f'Queue ({self._name}) empty.')
             return None
         
     def get_len(self):

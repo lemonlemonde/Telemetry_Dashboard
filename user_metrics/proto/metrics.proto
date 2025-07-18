@@ -7,9 +7,9 @@ message MetricRequest {
 
 // metrics:
 // - keys per minute (KPM)
-// - avg mouse speed (pixel dist / sec) (px/s)
+// - avg mouse speed (pixel dist / min) (px/min)
 // - clicks per minute (CPM)
-// - list of active media/song titles every 30 seconds ()
+// - active media/song titles every 30 seconds (multiple messages for multiple media)
 
 service MetricService {
     rpc GetKPMStream(MetricRequest) returns (stream MetricResponse);
@@ -21,7 +21,7 @@ service MetricService {
 message MetricResponse {
     oneof data {
         int32 kpm = 1;
-        float pxs = 2;
+        float pxm = 2;
         float cpm = 3;
         string title = 4;
     }

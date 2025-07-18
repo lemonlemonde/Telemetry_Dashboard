@@ -28,6 +28,10 @@ import mediaData as mediaData
 from utils import MetricQueue
 
 import grpc
+
+# for a gRPC logging bug on macOS
+# https://github.com/grpc/grpc/issues/37642
+os.environ["GRPC_VERBOSITY"] = "NONE"
 from concurrent import futures
 
 
@@ -42,8 +46,6 @@ def add_to_python_path(new_path):
     return sys.path
 
 add_to_python_path("./user_metrics/proto")
-
-
 
 from proto import metrics_pb2
 from proto import metrics_pb2_grpc
@@ -129,7 +131,7 @@ class MetricService(metrics_pb2_grpc.MetricServiceServicer):
             metric_tuple = mouse_speed_queue.get()
             if metric_tuple != None:
                 val, timestamp = metric_tuple
-                yield metrics_pb2.MetricResponse(pxs=val, timestamp=timestamp)
+                yield metrics_pb2.MetricResponse(pxm=val, timestamp=timestamp)
             else:
                 # sleep for a bit
                 time.sleep(0.5)

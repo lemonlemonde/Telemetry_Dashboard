@@ -1,13 +1,13 @@
-import time
+
 import logging
 import threading
 
 from pynput import keyboard
     
-
+from utils import MetricQueue
 
 # non-blocking thread
-def start_keyboard_listener(stop_event: threading.Event):
+def start_keyboard_listener(stop_event: threading.Event, queue: MetricQueue):
     logger = logging.getLogger(__name__)
     logger.info("Starting keyboard listener! 🎹")
     num_keys = 0
@@ -41,6 +41,9 @@ def start_keyboard_listener(stop_event: threading.Event):
         if stopped_early:
             break
         logger.info(f'KPM: {num_keys}')
+        # non blocking insert bc we want every 60 secs
+        queue.put(num_keys)
+            
         
     # close out at stop event
     listener.stop()

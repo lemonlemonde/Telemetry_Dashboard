@@ -2,6 +2,8 @@ import subprocess
 import logging
 import threading
 
+from utils import MetricQueue
+
 def get_spotify_now_playing():
     script = '''
     tell application "Spotify"
@@ -105,7 +107,7 @@ def get_possible_media():
         titles.append(spotify_track)
     return titles
     
-def start_media_listener(stop_event: threading.Event):
+def start_media_listener(stop_event: threading.Event, queue: MetricQueue):
     logger = logging.getLogger(__name__)
     logger.info("Starting media listener! 🎶")
     while not stop_event.is_set():
@@ -115,5 +117,7 @@ def start_media_listener(stop_event: threading.Event):
             break
         titles = get_possible_media()
         logger.info(titles)
+        for title in titles:
+            queue.put(title)
     
     logger.info("Stopping media listener! 🎶")

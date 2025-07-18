@@ -1,9 +1,13 @@
-from pynput import mouse
 import math
-import logging
 from datetime import datetime, timezone, timedelta
+import threading
 
-def start_mouse_listener(stop_event):
+import logging
+from pynput import mouse
+
+from utils import MetricQueue
+
+def start_mouse_listener(stop_event: threading.Event, mouse_speed_queue: MetricQueue, cpm_queue: MetricQueue):
     logger = logging.getLogger(__name__)
     logger.info("Starting mouse listener! 🐭")
     
@@ -31,6 +35,8 @@ def start_mouse_listener(stop_event):
             num_secs += 1
         
             logger.info(f'Avg speed: {speed_avg}')
+            # non blocking insert bc not that important
+            mouse_speed_queue.put(speed_avg)
             
         
 
@@ -63,9 +69,9 @@ def start_mouse_listener(stop_event):
         if stopped_early:
             break
         logger.info(f'CPM: {num_clicks}')
+        cpm_queue.put(num_clicks)
     
     # close out at stop_event
-    logger.info("Closing out mouse listener.")
     listener.stop()
     listener.join()
     

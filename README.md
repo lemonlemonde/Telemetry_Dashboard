@@ -45,6 +45,7 @@ pip install "psycopg[binary]"
 pip install "fastapi[standard]" uvicorn
 pip install redis
 pip install prometheus-client
+pip install pynput 
 
 npm install
 ```

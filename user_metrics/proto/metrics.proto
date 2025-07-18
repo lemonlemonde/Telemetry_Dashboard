@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package metrics;
+
+message MetricRequest {
+}
+
+// metrics:
+// - keys per minute (KPM)
+// - avg mouse speed (pixel dist / sec) (px/s)
+// - clicks per minute (CPM)
+// - list of active media/song titles every 30 seconds ()
+
+service MetricService {
+    rpc GetKPMStream(MetricRequest) returns (stream MetricResponse);
+    rpc GetMouseSpeedStream(MetricRequest) returns (stream MetricResponse);
+    rpc GetCPMStream(MetricRequest) returns (stream MetricResponse);
+    rpc GetMediaStream(MetricRequest) returns (stream MetricResponse);
+}
+
+message MetricResponse {
+    oneof data {
+        int32 kpm = 1;
+        float pxs = 2;
+        float cpm = 3;
+        string title = 4;
+    }
+}

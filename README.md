@@ -115,10 +115,10 @@ python -m grpc_tools.protoc --proto_path=proto --python_out=proto --grpc_python_
 python client.py
 
 # if you want to use SnakeViz, etc.
-python -m cProfile -o p_output.prof client.py
+python -m cProfile -o ../logs/p_output.prof client.py
 
 # after process ends, you can view output with:
-snakeviz p_output.prof
+snakeviz ../logs/p_output.prof
 ```
 
 **for deprecated cpp client:**

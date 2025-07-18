@@ -48,6 +48,9 @@ Thumbs.db
 .local
 build
 
-# venv
+# venv and stuff
 .venv
 __pycache__
+
+# redis
+*.rdb

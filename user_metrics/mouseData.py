@@ -70,13 +70,10 @@ def start_mouse_listener(stop_event: threading.Event, mouse_speed_queue: MetricQ
             stopped_early = stop_event.wait(timeout=60)
             if stopped_early:
                 break
-            
-            # recalc avg
-            speed_avg = dist_move / 60
         
-            logger.info(f'Avg speed: {speed_avg}')
+            logger.info(f'Pixels per min: {dist_move}')
             # non blocking insert bc not that important
-            mouse_speed_queue.put(speed_avg)
+            mouse_speed_queue.put(dist_move)
         
         
 

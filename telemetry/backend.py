@@ -50,6 +50,12 @@ TelemetryData = Annotated[
     Field(discriminator='telemetry_type')
 ]
 
+class MetricData(BaseModel):
+    timestamp: str
+    metric_type: Literal['kpm', 'cpm', 'pxm', 'title']
+    val: Union[int, float, str] # (kpm, cpm), pxm, title
+
+
 
 class ConnectionManager:
     def __init__(self):
@@ -105,7 +111,7 @@ app.add_middleware(
 )
 
 @app.post("/telem_data")
-async def post_data(telem_dict: TelemetryData):
+async def post_telem_data(telem_dict: TelemetryData):
     # TODO: type enforce the telem dict with the type
     # print(telem_dict)
     
@@ -118,6 +124,24 @@ async def post_data(telem_dict: TelemetryData):
         "msg": "got it!<3",
         "telemetry_type": telem_dict.telemetry_type,
         "sensor_id": telem_dict.sensor_id,
+    }
+    
+
+@app.post("/metric_data")
+async def post_metric_data(metric_dict: MetricData):
+    # TODO: type enforce the telem dict with the type
+    # print(telem_dict)
+    
+    # broadcast new data to frontend via web socket connection
+    metric_json = metric_dict.model_dump_json()
+    print(f"Broadcasting: `{metric_json}`")
+    await manager.broadcast(f"{metric_json}")
+    
+    return {
+        "msg": "got it!<3",
+        "timestamp": metric_dict.timestamp,
+        "metric_type": metric_dict.metric_type,
+        "val": metric_dict.val,
     }
     
     

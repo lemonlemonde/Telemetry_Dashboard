@@ -3,12 +3,52 @@
 A simulated telemetry pipeline (`server --> processing node --> database and backend --> frontend`).
 Learning project with simulated data, so no use case yet...!
 
-- C++ multithreaded server generating simulated data
-- Sent via gRPC to a Python client that runs coroutines in order to:
-    - batch insert the data into a Postgres database
-    - send the data to a FastAPI endpoint on a dashboard backend service
-- Dashboard backend service with FastAPI endpoints is running on a uvicorn server, and it broadcasts new data to all websocket clients (just one for now...)
-- Client is Next.js (with Redux) frontend
+There are 2 parts:
+1. **telemetry (simulated engine telemetry lol)**
+	- `server.cpp`
+		- multithreaded, multiple simulated "subsystem sensors"
+		- single thread-safe queue collects all generated data
+		- pop from queue to send through gRPC stream
+	- --> single gRPC stream for all telemetry data
+	- --> `client.py`
+		- asynchronous client to receive gRPC data
+		- immediately insert data to single Redis queue
+		- single db_buffer to batch COPY to `dashboard` db, single `telemetry_data` table
+			- batch based on time and size of queue
+		- pop from Redis queue, POST to FastAPI endpoint (`/telem_data`)
+	- --> `backend.py`
+		- FastAPI endpoint on Uvicorn server
+		- websocket connection manager for multiple frontend clients
+		- broadcast new data from `/telem_data` to all connected frontends
+		- also receives latency metrics `/latency` from frontend for Prometheus
+2. **user_metrics (metrics on local computer)**
+	- `metrics_server.py`
+		- multithreaded, collects 4 metrics on local computer
+		- metrics threads:
+			- `keyboardData.py`: keys pressed per minute (kpm)
+			- `mouseData.py`: clicks per minute (cpm), pixels (mouse movement) per minute (pxm)
+			- `mediaData.py`: looks for current media every 30 seconds (on Spotify, Firefox, Chrome, Safari)
+				- relies on AppleScript
+				- looks for "YouTube" in tab/window titles
+				- lots of caveats for the browsers
+		- each add data to their own `MetricQueue`
+			- max size 10
+			- if queue full, drops oldest data, inserts newest data
+			- nonblocking gets and puts
+		- `ENTER` is the stop_event for all threads
+	- --> 4 gRPC streams (kpm, cpm, pxm, title/media)
+	- --> `metrics_client.py`:
+		- asynchronous client to receive gRPC data
+		- 4 db_buffers, one for each metric
+			- batch COPY to 4 tables in Postgres (`dashboard` db, `metric_data_*`, etc tables)
+				- batch based on time and size of queue
+		- no Redis queue
+		- immediately async POST to FastAPI endpoint `/metric_data`
+	- --> `backend.py`
+		- same thing as above
+3. Frontend
+	- Next.js (with Redux)
+	- Button connect to `backend.py` to establish WebSocket connection with backend
 
 
 ## Tech stack
@@ -66,11 +106,11 @@ brew services start postgresql
 # connect with cur user
 psql postgres
 # make db
-postgres-# CREATE DATABASE IF NOT EXISTS telemetry;
+postgres-# CREATE DATABASE IF NOT EXISTS dashboard;
 
 # make everything else
 cd data
-psql -U mirujun -d telemetry -f telem.sql
+psql -U mirujun -d dashboard -f telem.sql
 ```
 
 **server:**

@@ -28,9 +28,9 @@ if _version_not_supported:
 class MetricServiceStub(object):
     """metrics:
     - keys per minute (KPM)
-    - avg mouse speed (pixel dist / sec) (px/s)
+    - avg mouse speed (pixel dist / min) (px/min)
     - clicks per minute (CPM)
-    - list of active media/song titles every 30 seconds ()
+    - active media/song titles every 30 seconds (multiple messages for multiple media)
 
     """
 
@@ -65,9 +65,9 @@ class MetricServiceStub(object):
 class MetricServiceServicer(object):
     """metrics:
     - keys per minute (KPM)
-    - avg mouse speed (pixel dist / sec) (px/s)
+    - avg mouse speed (pixel dist / min) (px/min)
     - clicks per minute (CPM)
-    - list of active media/song titles every 30 seconds ()
+    - active media/song titles every 30 seconds (multiple messages for multiple media)
 
     """
 
@@ -129,9 +129,9 @@ def add_MetricServiceServicer_to_server(servicer, server):
 class MetricService(object):
     """metrics:
     - keys per minute (KPM)
-    - avg mouse speed (pixel dist / sec) (px/s)
+    - avg mouse speed (pixel dist / min) (px/min)
     - clicks per minute (CPM)
-    - list of active media/song titles every 30 seconds ()
+    - active media/song titles every 30 seconds (multiple messages for multiple media)
 
     """
 

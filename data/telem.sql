@@ -1,7 +1,7 @@
 
 
--- telemetry database
-\c telemetry;
+-- dashboard database
+\c dashboard;
 
 
 -- Same thing as telemetry.proto
